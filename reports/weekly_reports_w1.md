@@ -30,7 +30,7 @@ Tiếp tục cài đặt trang web
   - Cài đặt trang web
 
 ### Khó khăn gặp phải
-  - Chưa có
+  - Không có
 
 ### Dự định tuần tới
   - Tiếp tục cài đặt trang web
