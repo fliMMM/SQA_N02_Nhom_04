@@ -10,10 +10,30 @@ import ListItemText from "@mui/material/ListItemText";
 import { CssBaseline } from "@mui/material";
 import assets from "../../assets/assets";
 import { useNavigate } from "react-router-dom";
+import HomeIcon from "@mui/icons-material/Home";
+import Home from "../../pages/Home/Home";
 
 interface Props {
   open: boolean;
 }
+
+interface navItem {}
+
+const navItems = [
+  {
+    to: "/",
+    text: "Trang chủ",
+    icon:<HomeIcon sx={{ color: "white" }} />
+  },
+  {
+    to: "/",
+    text: "Nộp tiền điện",
+  },
+  {
+    to: "/",
+    text: "Thống kê",
+  },
+];
 
 export default function SideBar(props: Props) {
   const { open } = props;
@@ -35,7 +55,30 @@ export default function SideBar(props: Props) {
             <ListItemText primary={"TÊN WEB"} style={{ color: "white" }} />
           </ListItemButton>
         </ListItem>
-        <Divider />
+
+        {navItems.map((navItem) => {
+          return (
+            <div key={navItem.text}>
+              <Divider />
+
+              <ListItem disablePadding sx={{ height: "52px" }}>
+                <ListItemButton
+                  onClick={() => {
+                    navigate(navItem.to);
+                  }}
+                >
+                  <ListItemIcon>
+                    {navItem?.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={navItem.text}
+                    style={{ color: "white" }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            </div>
+          );
+        })}
       </List>
     </Box>
   );

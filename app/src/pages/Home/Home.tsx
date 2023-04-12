@@ -1,47 +1,106 @@
-import React, { useEffect } from "react";
-import MenuIcon from "@mui/icons-material/Menu";
-import { Outlet } from "react-router-dom";
-import SideBar from "../../components/SideBar/SideBar";
-import { useState } from "react";
-import { IconButton, useMediaQuery } from "@mui/material";
-import styles from "./style.module.css";
+import React from "react";
+import { Card, Stack, CardContent, Typography } from "@mui/material";
+import DynamicFormIcon from "@mui/icons-material/DynamicForm";
+import { Chart } from "./Components/Chart/Chart";
+import LocalAtmIcon from "@mui/icons-material/LocalAtm";
+import useMediaQuery from "@mui/material/useMediaQuery/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
-import Header from "../../components/Header/header";
 
 function Home() {
-  const [open, setOpen] = useState<boolean>(true);
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
-
-  const toggleDrawer = () => {
-    setOpen(!open);
-  };
-
-  useEffect(() => {
-    if (isSmallScreen == true) {
-      setOpen(false);
-    } else {
-      setOpen(true);
-    }
-  }, [isSmallScreen]);
-
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("xs"));
   return (
-    <div>
-      <Header open={open} toggleDrawer={toggleDrawer}></Header>
-
-      <SideBar open={open} />
-
-      <div
-        style={{
-          marginLeft: open === true ? 250 : "auto",
-          padding: "10px",
-          backgroundColor: "rgb(248,249,249)",
-          height:'calc(100vh - 60px)'
-        }}
+    <Stack spacing={4} direction={'column'} >
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={{ xs: 2, sm: 3 }}
+        
       >
-        <Outlet />
-      </div>
-    </div>
+        <Card
+          sx={{
+            backgroundColor: "#FF9F43",
+            minWidth: "32%",
+          }}
+        >
+          <CardContent>
+            <Stack
+              direction={"row"}
+              justifyContent={"space-between"}
+              alignItems={"center"}
+            >
+              <Stack spacing={1}>
+                <Typography color={"white"} fontSize={20} fontWeight={"bold"}>
+                  100 W
+                </Typography>
+
+                <Typography color={"white"} fontSize={15} fontWeight={"bold"}>
+                  Số điện đã tiêu thụ
+                </Typography>
+              </Stack>
+
+              <DynamicFormIcon sx={{ color: "white", fontSize: "70px" }} />
+            </Stack>
+          </CardContent>
+        </Card>
+
+        <Card
+          sx={{
+            backgroundColor: "#FF9F43",
+            minWidth: "32%",
+          }}
+        >
+          <CardContent>
+            <Stack
+              direction={"row"}
+              justifyContent={"space-between"}
+              alignItems={"center"}
+            >
+              <Stack spacing={1}>
+                <Typography color={"white"} fontSize={20} fontWeight={"bold"}>
+                  100
+                </Typography>
+
+                <Typography color={"white"} fontSize={15} fontWeight={"bold"}>
+                  Tổng tiền điện
+                </Typography>
+              </Stack>
+
+              <LocalAtmIcon sx={{ color: "white", fontSize: "70px" }} />
+            </Stack>
+          </CardContent>
+        </Card>
+
+        <Card
+          sx={{
+            backgroundColor: "#FF9F43",
+            minWidth: "32%",
+          }}
+        >
+          <CardContent>
+            <Stack
+              direction={"row"}
+              justifyContent={"space-between"}
+              alignItems={"center"}
+            >
+              <Stack spacing={1}>
+                <Typography color={"white"} fontSize={20} fontWeight={"bold"}>
+                  100
+                </Typography>
+
+                <Typography color={"white"} fontSize={15} fontWeight={"bold"}>
+                  Con số gì đó
+                </Typography>
+              </Stack>
+
+              <DynamicFormIcon sx={{ color: "white", fontSize: "70px" }} />
+            </Stack>
+          </CardContent>
+        </Card>
+      </Stack>
+
+      <Chart chartName={"Biểu đồ tiêu thụ điện"} />
+      <Chart chartName={"Biểu đồ tiền điện"} />
+    </Stack>
   );
 }
 
