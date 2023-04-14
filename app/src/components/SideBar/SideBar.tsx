@@ -12,6 +12,7 @@ import assets from "../../assets/assets";
 import { useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import Home from "../../pages/Home/Home";
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
 interface Props {
   open: boolean;
@@ -26,12 +27,14 @@ const navItems = [
     icon:<HomeIcon sx={{ color: "white" }} />
   },
   {
-    to: "/",
+    to: "/payment",
     text: "Nộp tiền điện",
+    icon:<AttachMoneyIcon sx={{ color: "white" }} />
   },
   {
     to: "/",
     text: "Thống kê",
+    icon:<AttachMoneyIcon sx={{ color: "white" }} />
   },
 ];
 

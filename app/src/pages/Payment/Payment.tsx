@@ -5,6 +5,8 @@ import LocalAtmIcon from "@mui/icons-material/LocalAtm";
 import useMediaQuery from "@mui/material/useMediaQuery/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { Tabs, Tab, Box } from "@mui/material";
+import ThanhToan from "./Tabs/ThanhToan/ThanhToan";
+import LichSuThanhToan from "./Tabs/LichSu/LichSuThanhToan";
 
 function Payment() {
   const [tab, setTab] = useState(0);
@@ -38,7 +40,7 @@ function Payment() {
         id="tabpanel-thanhToan"
         aria-labelledby="thanhToan"
       >
-        hehe
+        <ThanhToan/>
       </div>
       <div
         hidden={tab === 0}
@@ -46,7 +48,7 @@ function Payment() {
         id="tabpanel-lichSuThanhToan"
         aria-labelledby="lichSuThanhToan"
       >
-        haha
+        <LichSuThanhToan/>
       </div>
     </Box>
   );
