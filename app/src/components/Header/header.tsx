@@ -27,7 +27,7 @@ function Header(props: Props) {
     setAnchorEl(null);
   };
 
-  console.log(anchorEl);
+  // console.log(anchorEl);
 
   useEffect(() => {
     const user = localStorage.getItem("user");

@@ -31,8 +31,8 @@ function createData(
 }
 
 const rows = [
-  createData(1, "Tiền điện tháng 1", 200000, "Đã thanh toán"),
-  createData(2, "Tiền điện tháng 2", 200000, "Đã thanh toán"),
+  createData(1, "Tiền điện tháng 1", 200000, ""),
+  createData(2, "Tiền điện tháng 2", 200000, ""),
 ];
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -214,7 +214,7 @@ export default function PaymentTable({ addBill }: PaymentTableProps) {
   };
 
   return (
-    <Box mt={2} sx={{ width: "100%" }}>
+    <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <TableContainer>
           <Table

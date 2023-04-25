@@ -48,7 +48,7 @@ function Payment() {
         id="tabpanel-lichSuThanhToan"
         aria-labelledby="lichSuThanhToan"
       >
-        <LichSuThanhToan/>
+        <LichSuThanhToan addBill={()=> null}/>
       </div>
     </Box>
   );
