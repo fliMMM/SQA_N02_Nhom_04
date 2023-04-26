@@ -13,26 +13,26 @@ interface Data {
   stt: number;
   content: string;
   amount: number;
-  note: string;
+  electricityIndex: number;
 }
 
 function createData(
   stt: number,
   content: string,
-  amount: number,
-  note: string
+  electricityIndex: number,
+  amount: number
 ): Data {
   return {
     stt,
     content,
+    electricityIndex,
     amount,
-    note,
   };
 }
 
 const rows = [
-  createData(1, "Tiền điện tháng 1", 200000, ""),
-  createData(2, "Tiền điện tháng 2", 200000, ""),
+  createData(1, "Tiền điện tháng 1", 30, 200000),
+  createData(2, "Tiền điện tháng 2", 40, 200000),
 ];
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -95,16 +95,16 @@ const headCells: readonly HeadCell[] = [
     label: "Nội dung",
   },
   {
+    id: "electricityIndex",
+    numeric: true,
+    disablePadding: false,
+    label: "Số điện",
+  },
+  {
     id: "amount",
     numeric: true,
     disablePadding: false,
-    label: "Số tiền",
-  },
-  {
-    id: "note",
-    numeric: true,
-    disablePadding: false,
-    label: "Ghi chú",
+    label: "Tổng tiền",
   },
 ];
 
@@ -265,8 +265,15 @@ export default function PaymentTable({ addBill }: PaymentTableProps) {
                           {index + 1}
                         </TableCell>
                         <TableCell align="left">{row.content}</TableCell>
-                        <TableCell align="left">{row.amount}</TableCell>
-                        <TableCell align="left">{row.note}</TableCell>
+                        <TableCell align="left">
+                          {row.electricityIndex}
+                        </TableCell>
+                        <TableCell align="left">
+                          {row.amount.toLocaleString("it-IT", {
+                            style: "currency",
+                            currency: "VND",
+                          })}
+                        </TableCell>
                       </TableRow>
                     );
                   })

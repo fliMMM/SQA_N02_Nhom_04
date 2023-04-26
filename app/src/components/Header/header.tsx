@@ -80,8 +80,14 @@ function Header(props: Props) {
               left: "10px",
             }}
           >
-            <MenuItem onClick={handleCloseMenu}>Profile</MenuItem>
-            <MenuItem onClick={handleCloseMenu}>My account</MenuItem>
+            <MenuItem
+              onClick={() => {
+                handleCloseMenu();
+                navigate("profile");
+              }}
+            >
+              Tài khoản
+            </MenuItem>
             <MenuItem
               onClick={() => {
                 handleCloseMenu();
@@ -102,8 +108,10 @@ function Header(props: Props) {
             ":hover": {
               backgroundColor: "#F58C5C",
             },
-            }}
-            onClick = {()=>{navigate('/login')}}
+          }}
+          onClick={() => {
+            navigate("/login");
+          }}
         >
           Đăng nhập
         </Button>

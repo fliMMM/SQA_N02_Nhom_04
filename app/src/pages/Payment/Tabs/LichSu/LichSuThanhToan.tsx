@@ -1,38 +1,47 @@
 import * as React from "react";
-import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import Checkbox from "@mui/material/Checkbox";
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Checkbox,
+  Button,
+} from "@mui/material";
+import MyDocument from "./PDF";
+import ReactPDF from "@react-pdf/renderer";
+import { PDFDownloadLink, Document, Page } from "@react-pdf/renderer";
 
 interface Data {
   stt: number;
   content: string;
   amount: number;
   note: string;
+  action: string;
 }
 
 function createData(
   stt: number,
   content: string,
   amount: number,
-  note: string
+  note: string,
+  action: string
 ): Data {
   return {
     stt,
     content,
     amount,
     note,
+    action,
   };
 }
 
 const rows = [
-  createData(1, "Tiền điện tháng 1", 200000, "Đã thanh toán"),
-  createData(2, "Tiền điện tháng 2", 200000, "Đã thanh toán"),
+  createData(1, "Tiền điện tháng 1", 200000, "Đã thanh toán", "dowload"),
+  createData(2, "Tiền điện tháng 2", 200000, "Đã thanh toán", "dowload"),
 ];
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -106,6 +115,12 @@ const headCells: readonly HeadCell[] = [
     disablePadding: false,
     label: "Ghi chú",
   },
+  {
+    id: "action",
+    numeric: true,
+    disablePadding: false,
+    label: "Hoá đơn",
+  },
 ];
 
 const DEFAULT_ORDER = "asc";
@@ -128,21 +143,10 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   return (
     <TableHead>
       <TableRow>
-        <TableCell padding="checkbox">
-          <Checkbox
-            color="primary"
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{
-              "aria-label": "select all desserts",
-            }}
-          />
-        </TableCell>
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={"left"}
+            align={"center"}
             padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
@@ -159,10 +163,10 @@ interface PaymentTableProps {
   addBill: (bill: Bill[]) => void;
 }
 
-export default function PaymentTable({ addBill }: PaymentTableProps) {
+export default function PaymentHistory() {
   const [order, setOrder] = React.useState<Order>(DEFAULT_ORDER);
   const [orderBy, setOrderBy] = React.useState<keyof Data>(DEFAULT_ORDER_BY);
-  const [selected, setSelected] = React.useState<Bill[]>([]);
+  const [selected, setSelected] = React.useState<Data[]>([]);
   const [visibleRows, setVisibleRows] = React.useState<Data[] | null>(null);
 
   React.useEffect(() => {
@@ -180,21 +184,19 @@ export default function PaymentTable({ addBill }: PaymentTableProps) {
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelected = rows.map((n) => n.content);
-      addBill(newSelected);
+      const newSelected = rows.map((n) => n);
       setSelected(newSelected);
       return;
     }
-    addBill([]);
     setSelected([]);
   };
 
-  const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected: Bill[] = [];
+  const handleClick = (event: React.MouseEvent<unknown>, data: Data) => {
+    const selectedIndex = selected.indexOf(data);
+    let newSelected: Data[] = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selected, data);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -206,12 +208,12 @@ export default function PaymentTable({ addBill }: PaymentTableProps) {
       );
     }
     setSelected(newSelected);
-    addBill(newSelected);
   };
 
-  const isSelected = (content: string) => {
-    return selected.indexOf(content) !== -1;
+  const isSelected = (row: Data) => {
+    return selected.indexOf(row) !== -1;
   };
+
 
   return (
     <Box mt={2} sx={{ width: "100%" }}>
@@ -231,7 +233,7 @@ export default function PaymentTable({ addBill }: PaymentTableProps) {
             <TableBody>
               {visibleRows
                 ? visibleRows.map((row, index) => {
-                    const isItemSelected = isSelected(row.content);
+                    const isItemSelected = isSelected(row);
                     // console.log(isItemSelected);
 
                     const labelId = `enhanced-table-checkbox-${index}`;
@@ -239,7 +241,7 @@ export default function PaymentTable({ addBill }: PaymentTableProps) {
                     return (
                       <TableRow
                         hover
-                        onClick={(event) => handleClick(event, row.content)}
+                        onClick={(event) => handleClick(event, row)}
                         role="checkbox"
                         aria-checked={isItemSelected}
                         tabIndex={-1}
@@ -247,26 +249,51 @@ export default function PaymentTable({ addBill }: PaymentTableProps) {
                         selected={isItemSelected}
                         sx={{ cursor: "pointer" }}
                       >
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            color="primary"
-                            checked={isItemSelected}
-                            inputProps={{
-                              "aria-labelledby": labelId,
-                            }}
-                          />
-                        </TableCell>
                         <TableCell
                           component="th"
                           id={labelId}
                           scope="row"
                           padding="none"
+                          align="center"
                         >
                           {index + 1}
                         </TableCell>
-                        <TableCell align="left">{row.content}</TableCell>
-                        <TableCell align="left">{row.amount}</TableCell>
-                        <TableCell align="left">{row.note}</TableCell>
+                        <TableCell align="center">{row.content}</TableCell>
+                        <TableCell align="center">{row.amount}</TableCell>
+                        <TableCell align="center">{row.note}</TableCell>
+                        <TableCell align="center">
+                          <PDFDownloadLink
+                            document={<MyDocument {...row} />}
+                            fileName="somename.pdf"
+                          >
+                            {({ blob, url, loading, error }) =>
+                              loading ? (
+                                "Loading document..."
+                              ) : (
+                                <Button
+                                  // onClick={() => xuatHoaDon(row)}
+                                  // // startIcon={
+                                  // //   <SummarizeIcon sx={{ color: "white" }} />
+                                  // // }
+                                  sx={{
+                                    height: "25px",
+                                    width: "100px",
+                                    backgroundColor: "#223771",
+                                    color: "white",
+                                    fontWeight: "bold",
+                                    ":hover": {
+                                      backgroundColor: "#3C5398",
+                                    },
+                                    marginBottom: 1,
+                                    fontSize: 10,
+                                  }}
+                                >
+                                  Xuất hoá đơn
+                                </Button>
+                              )
+                            }
+                          </PDFDownloadLink>
+                        </TableCell>
                       </TableRow>
                     );
                   })

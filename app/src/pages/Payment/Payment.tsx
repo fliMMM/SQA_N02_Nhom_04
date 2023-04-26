@@ -6,7 +6,7 @@ import useMediaQuery from "@mui/material/useMediaQuery/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { Tabs, Tab, Box } from "@mui/material";
 import ThanhToan from "./Tabs/ThanhToan/ThanhToan";
-import LichSuThanhToan from "./Tabs/LichSu/LichSuThanhToan";
+import PaymentHistory from "./Tabs/LichSu/LichSuThanhToan";
 
 function Payment() {
   const [tab, setTab] = useState(0);
@@ -48,7 +48,7 @@ function Payment() {
         id="tabpanel-lichSuThanhToan"
         aria-labelledby="lichSuThanhToan"
       >
-        <LichSuThanhToan addBill={()=> null}/>
+        <PaymentHistory/>
       </div>
     </Box>
   );

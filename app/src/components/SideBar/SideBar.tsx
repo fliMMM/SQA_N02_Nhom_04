@@ -31,11 +31,11 @@ const navItems = [
     text: "Nộp tiền điện",
     icon:<AttachMoneyIcon sx={{ color: "white" }} />
   },
-  {
-    to: "/",
-    text: "Thống kê",
-    icon:<AttachMoneyIcon sx={{ color: "white" }} />
-  },
+  // {
+  //   to: "/",
+  //   text: "Thống kê",
+  //   icon:<AttachMoneyIcon sx={{ color: "white" }} />
+  // },
 ];
 
 export default function SideBar(props: Props) {

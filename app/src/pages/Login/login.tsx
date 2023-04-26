@@ -10,6 +10,7 @@ import {
 import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useNavigate, Link } from "react-router-dom";
 
 const phoneRegExp =
   /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
@@ -40,10 +41,14 @@ function Login() {
     resolver: yupResolver(schema),
   });
 
-  const handleLogin = async (data:FormData) => {
-    localStorage.setItem('user', "1");
-   
-  }
+  const navigate = useNavigate();
+
+  const handleLogin = async (data: FormData) => {
+    console.log(data);
+
+    localStorage.setItem("user", "1");
+    navigate("/");
+  };
 
   return (
     <Box
@@ -82,6 +87,7 @@ function Login() {
           <FormHelperText id="my-helper-text" sx={{ color: "red" }}>
             {errors.password?.message}
           </FormHelperText>
+          <Link to={"/register"}>Đăng kí</Link>
           <Button
             type="submit"
             sx={{
