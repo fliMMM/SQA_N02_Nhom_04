@@ -11,6 +11,8 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useNavigate, Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../../slices/userSlice";
 
 const phoneRegExp =
   /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
@@ -27,6 +29,10 @@ const schema = yup
   .required();
 type FormData = yup.InferType<typeof schema>;
 
+interface UserState {
+  user: object
+}
+
 function Login() {
   const {
     register,
@@ -42,12 +48,18 @@ function Login() {
   });
 
   const navigate = useNavigate();
-
+  const dispatch = useDispatch<any>();
+  const user = useSelector((state: UserState) => state.user);
+ 
   const handleLogin = async (data: FormData) => {
-    console.log(data);
-
-    localStorage.setItem("user", "1");
-    navigate("/");
+    const loginData = {
+      email: "eve.holt@reqres.in",
+      password: "cityslicka",
+    };
+    // localStorage.setItem("user", "1");
+    // navigate("/");
+    const user = await dispatch(login(loginData)).unwrap();
+    console.log(user);
   };
 
   return (
