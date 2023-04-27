@@ -11,22 +11,27 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { _register } from "../../slices/userSlice";
+import { useDispatch } from "react-redux";
+import User from "../../models/user.model";
+import { useNavigate } from "react-router-dom";
 
-const phoneRegExp =
-  /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
+const emailRegExp =
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 const schema = yup
   .object({
-    phoneNumber: yup
+    email: yup
       .string()
 
-      .required("Không được để trống số điện thoại")
-      .matches(phoneRegExp, "Hãy nhập đúng số điện thoại!"),
+      .required("Không được để trống email")
+      .matches(emailRegExp, "Email không hợp lệ!"),
     password: yup.string().required("Không được để trống mật khẩu"),
     confirmPassword: yup
       .string()
       .required("Không được để trống mật khẩu")
       .oneOf([yup.ref("password")], "Mật khẩu không khớp"),
+    userCode: yup.string().required("Không được để trống mã khách hàng"),
   })
   .required();
 type FormData = yup.InferType<typeof schema>;
@@ -39,17 +44,26 @@ function Register() {
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
-      phoneNumber: "",
+      email: "",
+      userCode: "",
       password: "",
       confirmPassword: "",
     },
     resolver: yupResolver(schema),
   });
 
-  const handleLogin = async (data: FormData) => {
-    console.log(data);
+  const dispatch = useDispatch<any>();
+  const navigate = useNavigate();
 
-    // localStorage.setItem("user", "1");
+  const handleLogin = async (data: User) => {
+    // console.log(data);
+
+    const _data = await dispatch(_register(data)).unwrap();
+    if (_data.user) {
+      navigate("/")
+    } else {
+      alert("tài khoản đã tồn tại")
+    }
   };
 
   return (
@@ -73,18 +87,30 @@ function Register() {
       >
         <Stack spacing={2}>
           <Typography textAlign={"center"} variant="h6">
-            Đăng nhập
+            Đăng ký
           </Typography>
           <TextField
-            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-            label="Số điện thoại"
-            {...register("phoneNumber", { required: true })}
+            // inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+            label="Email"
+            {...register("email", { required: true })}
           />
-          {errors.phoneNumber && (
+          {errors.email && (
             <FormHelperText id="my-helper-text" sx={{ color: "red" }}>
-              {errors.phoneNumber?.message}
+              {errors.email?.message}
             </FormHelperText>
           )}
+
+          <TextField
+            // inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+            label="Mã khách hàng"
+            {...register("userCode", { required: true })}
+          />
+          {errors.userCode && (
+            <FormHelperText id="my-helper-text" sx={{ color: "red" }}>
+              {errors.userCode?.message}
+            </FormHelperText>
+          )}
+
           <TextField label="Mật khẩu" {...register("password")} />
           {errors.password && (
             <FormHelperText id="my-helper-text" sx={{ color: "red" }}>
