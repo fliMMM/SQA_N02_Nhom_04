@@ -4,14 +4,14 @@ const UserSchema = require("../model/user");
 
 Router.post("/login", async (req, res) => {
   const data = req.body;
-  console.log(data);
+  console.log("a user login: ", data);
 
   try {
     const user = await UserSchema.findOne(data);
     if (!user) {
       return res
         .status(400)
-        .json({ success: false, message: "Tài khoản không tồn tại" });
+        .json({ success: false, message: "Sai tên đăng nhập hoặc mật khẩu" });
     }
 
     //console.log(user);
@@ -29,6 +29,8 @@ Router.post("/login", async (req, res) => {
 
 Router.post("/register", async (req, res) => {
   const data = req.body;
+  console.log("a user register: ", data);
+  // return;
   if (data.password !== data.confirmPassword) {
     return res
       .status(400)
