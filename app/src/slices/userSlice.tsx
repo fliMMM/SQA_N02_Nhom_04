@@ -37,7 +37,7 @@ const userSlice = createSlice({
         state.isLoading = false;
         state.errorMessage = "Không thành công"
       })
-  }
+  },
 });
 
 const { reducer, actions } = userSlice;
