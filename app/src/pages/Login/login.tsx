@@ -13,11 +13,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../../slices/userSlice";
+import { MyData, login } from "../../slices/userSlice";
 import User from "../../models/user.model";
-import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CircularProgress from "@mui/material/CircularProgress";
+import { AppDispatch, RootState } from "../../app/store";
+import { useEffect } from "react";
+import { useSnackbar } from "notistack";
 
 const emailRegExp =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -49,22 +51,28 @@ function Login() {
   });
 
   const navigate = useNavigate();
-  const dispatch = useDispatch<any>();
+  const dispatch = useDispatch<AppDispatch>();
   const { user, errorMessage, isLoading, isError } = useSelector(
-    (state: any) => state.user
+    (state: RootState) => state.user
   );
+  const { enqueueSnackbar} = useSnackbar();
 
   const handleLogin = async (data: FormData) => {
-    const _data = await dispatch(login(data));
-    // console.log(_data.payload.success);
+    const _data = await dispatch(login(data)).unwrap();
 
-    if (_data.user !== null) {
+    if (_data.success === true) {
       navigate("/");
     }
-    if (_data.payload.success === false) {
-      alert(errorMessage);
-    }
   };
+
+  useEffect(() => {
+    if (isError) {
+      enqueueSnackbar(errorMessage, {
+        variant: "error",
+        autoHideDuration: 2000,
+      });
+    }
+  }, [isError]);
 
   return (
     <Box
@@ -99,7 +107,12 @@ function Login() {
               {errors.email?.message}
             </FormHelperText>
           )}
-          <TextField label="Mật khẩu" {...register("password")} />
+          <TextField
+            autoComplete="on"
+            type="password"
+            label="Mật khẩu"
+            {...register("password")}
+          />
           <FormHelperText id="my-helper-text" sx={{ color: "red" }}>
             {errors.password?.message}
           </FormHelperText>
@@ -126,18 +139,6 @@ function Login() {
           </Button>
         </Stack>
       </Paper>
-      <ToastContainer
-        position="top-left"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
     </Box>
   );
 }

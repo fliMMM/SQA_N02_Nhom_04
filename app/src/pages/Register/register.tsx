@@ -12,9 +12,12 @@ import { Link } from "react-router-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { _register } from "../../slices/userSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import User from "../../models/user.model";
 import { useNavigate } from "react-router-dom";
+import { AppDispatch, RootState } from "../../app/store";
+import { useEffect } from "react";
+import { useSnackbar } from "notistack";
 
 const emailRegExp =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -52,19 +55,30 @@ function Register() {
     resolver: yupResolver(schema),
   });
 
-  const dispatch = useDispatch<any>();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const { isError, isLoading, errorMessage } = useSelector(
+    (state: RootState) => state.user
+  );
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleLogin = async (data: User) => {
     // console.log(data);
 
     const _data = await dispatch(_register(data)).unwrap();
-    if (_data.user) {
-      navigate("/")
-    } else {
-      alert("tài khoản đã tồn tại")
+    if (_data.success === true) {
+      navigate("/");
     }
   };
+
+  useEffect(() => {
+    if (isError) {
+      enqueueSnackbar(errorMessage, {
+        variant: "error",
+        autoHideDuration: 2000,
+      });
+    }
+  }, [isError]);
 
   return (
     <Box
@@ -111,7 +125,12 @@ function Register() {
             </FormHelperText>
           )}
 
-          <TextField label="Mật khẩu" {...register("password")} />
+          <TextField
+            autoComplete="on"
+            type="password"
+            label="Mật khẩu"
+            {...register("password")}
+          />
           {errors.password && (
             <FormHelperText id="my-helper-text" sx={{ color: "red" }}>
               {errors.password?.message}
@@ -119,6 +138,8 @@ function Register() {
           )}
 
           <TextField
+            autoComplete="on"
+            type="password"
             label="Xác nhận mật khẩu"
             {...register("confirmPassword")}
           />

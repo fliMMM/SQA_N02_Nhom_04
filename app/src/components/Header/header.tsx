@@ -19,7 +19,7 @@ function Header(props: Props) {
     const dispatch = useDispatch<any>();
   const { user } = useSelector((state: any) => state.user);
 
-console.log(user);
+// console.log(user);
 
   // const [user, setUser] = useState<boolean>(false);
 

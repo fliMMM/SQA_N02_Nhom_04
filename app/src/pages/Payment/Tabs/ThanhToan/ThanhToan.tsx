@@ -12,6 +12,8 @@ import SendIcon from "@mui/icons-material/Send";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import PaymentTable from "./Table";
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../app/store";
 
 interface Bill {
 
@@ -20,8 +22,9 @@ interface Bill {
 function ThanhToan() {
   const [bank, setBank] = useState<string>("Chọn ngân hàng");
   const [bill, setBill] = useState<Bill[]>([]);
+  const {user} = useSelector((state:RootState)=> state.user)
 
-  console.log(bill);
+   console.log(user);
   
 
   const handleSelectBank = (e: SelectChangeEvent) => {
