@@ -3,12 +3,13 @@ import { Card, Stack, CardContent, Typography } from "@mui/material";
 import DynamicFormIcon from "@mui/icons-material/DynamicForm";
 import { Chart } from "./Components/Chart/Chart";
 import LocalAtmIcon from "@mui/icons-material/LocalAtm";
-import useMediaQuery from "@mui/material/useMediaQuery/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
+import { useSelector } from "react-redux";
+import tinhTienDien from "../../utils/tinhTienDien";
+import convertNumberToVnd from "../../utils/convert";
 
 function Home() {
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("xs"));
+  const { user } = useSelector((state: any) => state.user);
+
   return (
     <Stack spacing={4} direction={'column'} >
       <Stack
@@ -30,7 +31,7 @@ function Home() {
             >
               <Stack spacing={1}>
                 <Typography color={"white"} fontSize={20} fontWeight={"bold"}>
-                  100 W
+                  {user.electricityIndex} W
                 </Typography>
 
                 <Typography color={"white"} fontSize={15} fontWeight={"bold"}>
@@ -57,7 +58,7 @@ function Home() {
             >
               <Stack spacing={1}>
                 <Typography color={"white"} fontSize={20} fontWeight={"bold"}>
-                  100
+                  {convertNumberToVnd(tinhTienDien(user.electricityIndex))}
                 </Typography>
 
                 <Typography color={"white"} fontSize={15} fontWeight={"bold"}>
@@ -84,7 +85,7 @@ function Home() {
             >
               <Stack spacing={1}>
                 <Typography color={"white"} fontSize={20} fontWeight={"bold"}>
-                  100
+                  {convertNumberToVnd(tinhTienDien(user.electricityIndex))}
                 </Typography>
 
                 <Typography color={"white"} fontSize={15} fontWeight={"bold"}>

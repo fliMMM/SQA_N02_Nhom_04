@@ -7,6 +7,7 @@ import {
   Typography,
   FormHelperText,
 } from "@mui/material";
+import LoadingButton from "@mui/lab/LoadingButton";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -14,6 +15,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../slices/userSlice";
 import User from "../../models/user.model";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const emailRegExp =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -46,17 +50,19 @@ function Login() {
 
   const navigate = useNavigate();
   const dispatch = useDispatch<any>();
-  const { user, errorMessage, isError } = useSelector((state: any) => state.user);
+  const { user, errorMessage, isLoading, isError } = useSelector(
+    (state: any) => state.user
+  );
 
-  console.log(errorMessage);
-  
   const handleLogin = async (data: FormData) => {
-    await dispatch(login(data));
-    
-    if (user) {
+    const _data = await dispatch(login(data));
+    // console.log(_data.payload.success);
+
+    if (_data.user !== null) {
       navigate("/");
-    } else {
-      console.log(errorMessage);
+    }
+    if (_data.payload.success === false) {
+      alert(errorMessage);
     }
   };
 
@@ -99,7 +105,15 @@ function Login() {
           </FormHelperText>
           <Link to={"/register"}>Đăng kí</Link>
           <Button
+            startIcon={
+              isLoading === true ? (
+                <CircularProgress size={15} sx={{ color: "white" }} />
+              ) : (
+                <></>
+              )
+            }
             type="submit"
+            disabled={isLoading}
             sx={{
               backgroundColor: "rgb(34,54,113)",
               color: "white",
@@ -112,6 +126,18 @@ function Login() {
           </Button>
         </Stack>
       </Paper>
+      <ToastContainer
+        position="top-left"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </Box>
   );
 }

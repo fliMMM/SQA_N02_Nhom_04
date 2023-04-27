@@ -43,7 +43,7 @@ console.log(user);
   // }, []);
 
   const _logout = () => {
-    dispatch(logout);
+    dispatch(logout({}));
     location.reload();
   }
 
@@ -111,21 +111,7 @@ console.log(user);
           </Menu>
         </div>
       ) : (
-        <Button
-          sx={{
-            color: "white",
-            backgroundColor: "#223671",
-            fontWeight: "bold",
-            ":hover": {
-              backgroundColor: "#F58C5C",
-            },
-          }}
-          onClick={() => {
-            navigate("/login");
-          }}
-        >
-          Đăng nhập
-        </Button>
+        <></>
       )}
     </header>
   );
