@@ -1,10 +1,17 @@
 import axiosClient from "./axiosClient";
 
-const authApi = {
-  login() {
-    const url = "";
+import UserInfo from "../models/user.model";
 
-    return axiosClient.post(url, {});
+const authApi =  {
+  login(userData: UserInfo) {
+    const url = "auth/login";
+
+    return axiosClient.post(url, userData);
+  },
+  register(userData: UserInfo) {
+    const url = "auth/register";
+
+    return axiosClient.post(url, userData);
   }
 }
 

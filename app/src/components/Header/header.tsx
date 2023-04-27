@@ -6,7 +6,8 @@ import assets from "../../assets/assets";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useNavigate } from "react-router-dom";
-
+import { useDispatch, useSelector } from "react-redux";
+import {logout} from "../../slices/userSlice"
 interface Props {
   open: boolean;
   toggleDrawer: () => void;
@@ -15,8 +16,12 @@ interface Props {
 function Header(props: Props) {
   const { open, toggleDrawer } = props;
   const navigate = useNavigate();
+    const dispatch = useDispatch<any>();
+  const { user } = useSelector((state: any) => state.user);
 
-  const [user, setUser] = useState<boolean>(false);
+console.log(user);
+
+  // const [user, setUser] = useState<boolean>(false);
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
@@ -29,13 +34,18 @@ function Header(props: Props) {
 
   // console.log(anchorEl);
 
-  useEffect(() => {
-    const user = localStorage.getItem("user");
+  // useEffect(() => {
+  //   const user = localStorage.getItem("user");
 
-    if (user) {
-      setUser(true);
-    }
-  }, []);
+  //   if (user) {
+  //     setUser(true);
+  //   }
+  // }, []);
+
+  const _logout = () => {
+    dispatch(logout);
+    location.reload();
+  }
 
   return (
     <header className={styles.header}>
@@ -46,7 +56,7 @@ function Header(props: Props) {
         <MenuIcon sx={{ color: "rgb(245,140,92)" }} />
       </IconButton>
 
-      {user === true ? (
+      {user !== null ? (
         <div>
           <Button
             id="basic-button"
@@ -57,7 +67,7 @@ function Header(props: Props) {
             sx={{ color: "rgb(34,54,113)", fontWeight: "bold" }}
           >
             <img src={assets.logo} alt="" width={60} height={50} />
-            <p>Bui HUy Bach</p>
+            <p>{user?.email}</p>
             {openMenu === true ? (
               <KeyboardArrowUpIcon sx={{ color: "rgb(34,54,113)" }} />
             ) : (
@@ -91,8 +101,9 @@ function Header(props: Props) {
             <MenuItem
               onClick={() => {
                 handleCloseMenu();
-                localStorage.removeItem("user");
-                setUser(false);
+                _logout();
+                // localStorage.removeItem("user");
+                // setUser(false);
               }}
             >
               Logout
