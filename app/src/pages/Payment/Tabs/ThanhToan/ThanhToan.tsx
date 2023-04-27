@@ -21,10 +21,10 @@ interface Bill {
 
 function ThanhToan() {
   const [bank, setBank] = useState<string>("Chọn ngân hàng");
-  const [bill, setBill] = useState<Bill[]>([]);
+  const [bill, setBill] = useState<string[]>([]);
   const {user} = useSelector((state:RootState)=> state.user)
 
-   console.log(user);
+  //  console.log(user);
   
 
   const handleSelectBank = (e: SelectChangeEvent) => {

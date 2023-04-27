@@ -1,6 +1,8 @@
 const express = require("express");
 const Router = express.Router();
 const UserSchema = require("../model/user");
+const BillsSchema = require("../model/bill");
+var cron = require('node-cron');
 
 Router.post("/login", async (req, res) => {
   const data = req.body;
@@ -14,8 +16,6 @@ Router.post("/login", async (req, res) => {
         .json({ success: false, message: "Sai tên đăng nhập hoặc mật khẩu" });
     }
 
-    //console.log(user);
-
     return res
       .status(200)
       .json({ success: true, message: "Đăng nhập thành công", user: user });
@@ -27,22 +27,52 @@ Router.post("/login", async (req, res) => {
   }
 });
 
+const scheduleAddBill =async  (user) => {
+  const _newBill = new BillsSchema({
+    userCode: user.userCode,
+    electricityIndex: 150
+  });
+  await _newBill.save();
+  cron.schedule('* * 28 * *', async () => {
+    const newBill = new BillsSchema({
+    userCode: user.userCode,
+    electricityIndex: 150
+  });
+    console.log("add bill for user: ", user.email);
+    await newBill.save();
+  })
+}
+
 Router.post("/register", async (req, res) => {
   const data = req.body;
   console.log("a user register: ", data);
-  // return;
   if (data.password !== data.confirmPassword) {
     return res
       .status(400)
-      .json({ success: false, message: "Mật khẩu và mật khẩu xác nhận không khớp" });
+      .json({
+        success: false,
+        message: "Mật khẩu và mật khẩu xác nhận không khớp",
+      });
   }
   try {
     const user = await UserSchema.findOne({ email: data.email });
     if (user) {
       return res
         .status(400)
-        .json({ success: false, message: "Tài khoản đã tồn tại" });
+        .json({ success: false, message: "Email đã được đăng kí" });
     }
+
+    const userWithExistUserCode = await UserSchema.findOne({
+      userCode: data.userCode,
+    });
+
+    if (userWithExistUserCode) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Mã khách hàng đã được đăng kí" });
+    }
+
+    scheduleAddBill(data);
 
     const { confirmPassword, ..._data } = data;
     const newUser = new UserSchema(_data);
@@ -50,7 +80,7 @@ Router.post("/register", async (req, res) => {
 
     return res
       .status(200)
-      .json({ success: true, message: "Đăng kí thành công", user:newUser });
+      .json({ success: true, message: "Đăng kí thành công", user: newUser });
   } catch (err) {
     console.log(err);
     return res

@@ -8,6 +8,11 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Checkbox from "@mui/material/Checkbox";
+import { useEffect, useState } from "react";
+import billApi from "../../../../api/billApi";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../app/store";
+import User from "../../../../models/user.model";
 
 interface Data {
   stt: number;
@@ -30,10 +35,6 @@ function createData(
   };
 }
 
-const rows = [
-  createData(1, "Tiền điện tháng 1", 30, 200000),
-  createData(2, "Tiền điện tháng 2", 40, 200000),
-];
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -122,8 +123,6 @@ interface EnhancedTableProps {
 
 function EnhancedTableHead(props: EnhancedTableProps) {
   const { onSelectAllClick, order, orderBy, numSelected, rowCount } = props;
-  const createSortHandler =
-    (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {};
 
   return (
     <TableHead>
@@ -154,16 +153,32 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-interface Bill {}
+interface Bill {
+  _id: string;
+  userCode: string;
+  electricityIndex: number;
+  isPaid: false;
+}
 interface PaymentTableProps {
-  addBill: (bill: Bill[]) => void;
+  addBill: (bill: string[]) => void;
 }
 
 export default function PaymentTable({ addBill }: PaymentTableProps) {
   const [order, setOrder] = React.useState<Order>(DEFAULT_ORDER);
   const [orderBy, setOrderBy] = React.useState<keyof Data>(DEFAULT_ORDER_BY);
-  const [selected, setSelected] = React.useState<Bill[]>([]);
+  const [selected, setSelected] = React.useState<string[]>([]);
   const [visibleRows, setVisibleRows] = React.useState<Data[] | null>(null);
+  const { user } = useSelector((state: RootState) => state.user);
+  const [unpaidBills, setUnpaidBills] = useState<Bill[]>([]);
+
+  const _rows = [
+  createData(1, "Tiền điện tháng 1", 30, 200000),
+  createData(2, "Tiền điện tháng 2", 40, 200000),
+];
+
+  const rows = unpaidBills.map((bill, index) => {
+    return createData(index+1, "", bill.electricityIndex, bill.electricityIndex*2.5)
+  })
 
   React.useEffect(() => {
     let rowsOnMount = stableSort(
@@ -178,6 +193,20 @@ export default function PaymentTable({ addBill }: PaymentTableProps) {
     setVisibleRows(rowsOnMount);
   }, []);
 
+
+  const getUnpaidBill = async () => {
+    try {
+      const res = await billApi.getUnpaid({userCode:user?.userCode} as any);
+      setUnpaidBills(res.data.data);
+      
+    } catch (err) {
+      
+    }
+  }
+  useEffect(() => {
+    getUnpaidBill();
+  },[])
+
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
       const newSelected = rows.map((n) => n.content);
@@ -191,7 +220,7 @@ export default function PaymentTable({ addBill }: PaymentTableProps) {
 
   const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
     const selectedIndex = selected.indexOf(name);
-    let newSelected: Bill[] = [];
+    let newSelected: string[] = [];
 
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, name);
@@ -212,6 +241,8 @@ export default function PaymentTable({ addBill }: PaymentTableProps) {
   const isSelected = (content: string) => {
     return selected.indexOf(content) !== -1;
   };
+
+  
 
   return (
     <Box sx={{ width: "100%" }}>

@@ -40,6 +40,13 @@ export const _register = createAsyncThunk(
   }
 );
 
+interface initState{
+  isLoading: boolean;
+  user: User | null;
+  errorMessage: string;
+  isError:boolean
+}
+
 const userSlice = createSlice({
   name: "users",
   initialState: {
@@ -47,7 +54,7 @@ const userSlice = createSlice({
     user: JSON.parse(localStorage.getItem("user") || "null"),
     errorMessage: "",
     isError: false,
-  },
+  } as initState,
   reducers: {
     logout(state) {
       console.log("user log out");

@@ -3,8 +3,9 @@ const Schema = mongoose.Schema;
 
 const BillsSchema = new Schema({
   userCode: { type: String, require: true },
-  amountMoney: { type: Number, require: true },
-  electricityIndex:{type:Number, require:true}
+  amountMoney: { type: Number},
+  electricityIndex: { type: Number, require: true },
+  isPaid: {type:Boolean, default: false}
 },{timestamps:true});
 
-module.exports = mongoose.model("post", BillsSchema);
+module.exports = mongoose.model("bill", BillsSchema);
