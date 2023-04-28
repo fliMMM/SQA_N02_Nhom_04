@@ -5,6 +5,7 @@ interface Bill{
   electricityIndex: number;
   isPaid: boolean;
   content: string;
+  updateAt: string;
 }
 
 export interface BillToPay{

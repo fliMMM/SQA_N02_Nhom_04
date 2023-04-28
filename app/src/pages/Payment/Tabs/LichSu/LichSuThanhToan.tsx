@@ -27,6 +27,7 @@ interface TableRow {
   _id: string;
   note: string;
   action: string;
+  payDate: string;
 }
 
 function createData(
@@ -35,7 +36,8 @@ function createData(
   electricityIndex: number,
   amountMoney: number,
   isPaid: boolean,
-  userCode: string
+  userCode: string,
+  updateAt: string
 ): Bill {
   return {
     _id,
@@ -44,6 +46,7 @@ function createData(
     amountMoney,
     isPaid,
     userCode,
+    updateAt
   };
 }
 
@@ -130,6 +133,12 @@ const headCells: readonly HeadCell[] = [
     label: "Ghi chú",
   },
   {
+    id: "payDate",
+    numeric: true,
+    disablePadding: false,
+    label: "Ngày thanh toán",
+  },
+  {
     id: "action",
     numeric: true,
     disablePadding: false,
@@ -169,9 +178,14 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 
-export default function PaymentHistory() {
+interface PaymenHisProps{
+  reload: boolean;
+  setReload: (reload:boolean) =>void
+}
+
+
+export default function PaymentHistory({reload, setReload}: PaymenHisProps) {
   const [selected, setSelected] = React.useState<Bill[]>([]);
-  const [visibleRows, setVisibleRows] = React.useState<Bill[] | null>(null);
   const [paidBills, setPaidBills] = useState<Bill[]>([]);
   const [rows, setRows] = useState<Bill[]>([]);
   const { user } = useSelector((state: RootState) => state.user);
@@ -184,7 +198,7 @@ export default function PaymentHistory() {
   };
   useEffect(() => {
     getUnpaidBill();
-  }, []);
+  }, [reload]);
 
   useEffect(() => {
     if (paidBills) {
@@ -195,14 +209,15 @@ export default function PaymentHistory() {
           bill.electricityIndex,
           bill.electricityIndex * 2500,
           bill.isPaid,
-          bill.userCode
+          bill.userCode,
+          bill.updateAt
         );
       });
       setRows(_rows);
     }
   }, [paidBills]);
 
-  console.log(rows);
+  console.log(paidBills);
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -291,6 +306,9 @@ export default function PaymentHistory() {
                           {row.isPaid === true
                             ? "Đã thanh toán"
                             : "Chưa thanh toán"}
+                        </TableCell>
+                        <TableCell align="center">
+                          {row.updateAt}
                         </TableCell>
                         <TableCell align="center">
                           <PDFDownloadLink

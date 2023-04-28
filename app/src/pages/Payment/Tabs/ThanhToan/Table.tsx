@@ -160,9 +160,10 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 interface PaymentTableProps {
   addBill: (bill: Bill[]) => void;
+  reload: boolean
 }
 
-export default function PaymentTable({ addBill }: PaymentTableProps) {
+export default function PaymentTable({ addBill, reload }: PaymentTableProps) {
   const [selected, setSelected] = React.useState<Bill[]>([]);
   const { user } = useSelector((state: RootState) => state.user);
   const [unpaidBills, setUnpaidBills] = useState<Bill[]>([]);
@@ -176,7 +177,7 @@ export default function PaymentTable({ addBill }: PaymentTableProps) {
   };
   useEffect(() => {
     getUnpaidBill();
-  }, []);
+  }, [reload]);
 
   useEffect(() => {
     if (unpaidBills) {

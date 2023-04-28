@@ -19,7 +19,12 @@ import { RootState } from "../../../../app/store";
 import billApi from "../../../../api/billApi";
 import CircularProgress from "@mui/material/CircularProgress";
 
-function ThanhToan() {
+interface ThanhToanProps {
+  reload: boolean;
+  setReload: (reload:boolean) => void;
+}
+
+function ThanhToan({reload, setReload}:ThanhToanProps) {
   const [bank, setBank] = useState<string>("Chọn ngân hàng");
   const [bill, setBill] = useState<Bill[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -52,6 +57,7 @@ function ThanhToan() {
       const res = await billApi.pay(billToPay);
       noti(res.data.message, "success");
       setLoading(false);
+      setReload(!reload);
     } catch (err) {
       noti("Thanh toán không thành công", "error");
     }
@@ -156,7 +162,7 @@ function ThanhToan() {
         <Typography mb={1} color={"#223671"} fontSize={17} fontWeight={"bold"}>
           Thông tin thanh toán
         </Typography>
-        <PaymentTable addBill={setBill} />
+        <PaymentTable reload={reload} addBill={setBill} />
       </Box>
     </Box>
   );

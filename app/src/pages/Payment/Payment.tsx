@@ -12,6 +12,7 @@ import { RootState } from "../../app/store";
 
 function Payment() {
   const [tab, setTab] = useState(0);
+  const [reload, setReload] = useState<boolean>(false);
 
   const handleChangTab = (e: React.SyntheticEvent, newValue: number) => {
     setTab(newValue);
@@ -43,7 +44,7 @@ function Payment() {
         id="tabpanel-thanhToan"
         aria-labelledby="thanhToan"
       >
-        <ThanhToan/>
+        <ThanhToan reload={reload} setReload={ setReload} />
       </div>
       <div
         hidden={tab === 0}
@@ -51,7 +52,7 @@ function Payment() {
         id="tabpanel-lichSuThanhToan"
         aria-labelledby="lichSuThanhToan"
       >
-        <PaymentHistory/>
+        <PaymentHistory reload={reload} setReload={ setReload}/>
       </div>
     </Box>
   );
