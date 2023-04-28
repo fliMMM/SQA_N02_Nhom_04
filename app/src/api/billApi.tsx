@@ -1,9 +1,6 @@
 import axiosClient from "./axiosClient";
+import { BillToPay } from "../models/bill.model";
 
-interface BillToPay{
-  userCode: string,
-  billIds: string[]
-}
 
 const billApi =  {
   pay(billToPay: BillToPay) {

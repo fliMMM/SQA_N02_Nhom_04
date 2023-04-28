@@ -2,7 +2,7 @@ const express = require("express");
 const Router = express.Router();
 const UserSchema = require("../model/user");
 const BillsSchema = require("../model/bill");
-var cron = require('node-cron');
+var cron = require("node-cron");
 
 Router.post("/login", async (req, res) => {
   const data = req.body;
@@ -27,32 +27,33 @@ Router.post("/login", async (req, res) => {
   }
 });
 
-const scheduleAddBill =async  (user) => {
+const scheduleAddBill = async (user) => {
+  console.log("start schedule for: ", user.fullname);
   const _newBill = new BillsSchema({
     userCode: user.userCode,
-    electricityIndex: 150
+    electricityIndex: 150,
+    content: `Tiền điện tháng ${new Date().getMonth() +1}`,
   });
   await _newBill.save();
-  cron.schedule('* * 28 * *', async () => {
+  cron.schedule("0 1 28 * *", async () => {
     const newBill = new BillsSchema({
-    userCode: user.userCode,
-    electricityIndex: 150
-  });
+      userCode: user.userCode,
+      electricityIndex: 150,
+      content: `Tiền điện tháng ${new Date().getMonth() +1}`,
+    });
     console.log("add bill for user: ", user.email);
     await newBill.save();
-  })
-}
+  });
+};
 
 Router.post("/register", async (req, res) => {
   const data = req.body;
   console.log("a user register: ", data);
   if (data.password !== data.confirmPassword) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "Mật khẩu và mật khẩu xác nhận không khớp",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "Mật khẩu và mật khẩu xác nhận không khớp",
+    });
   }
   try {
     const user = await UserSchema.findOne({ email: data.email });

@@ -12,37 +12,45 @@ import {
   Button,
 } from "@mui/material";
 import MyDocument from "./PDF";
-import ReactPDF from "@react-pdf/renderer";
-import { PDFDownloadLink, Document, Page } from "@react-pdf/renderer";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { useState, useEffect } from "react";
+import Bill from "../../../../models/bill.model";
+import billApi from "../../../../api/billApi";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../app/store";
 
-interface Data {
+interface TableRow {
   stt: number;
   content: string;
   amount: number;
+  electricityIndex: number;
+  _id: string;
   note: string;
   action: string;
 }
 
 function createData(
-  stt: number,
+  _id: string,
   content: string,
-  amount: number,
-  note: string,
-  action: string
-): Data {
+  electricityIndex: number,
+  amountMoney: number,
+  isPaid: boolean,
+  userCode: string
+): Bill {
   return {
-    stt,
+    _id,
     content,
-    amount,
-    note,
-    action,
+    electricityIndex,
+    amountMoney,
+    isPaid,
+    userCode,
   };
 }
 
-const rows = [
-  createData(1, "Tiền điện tháng 1", 200000, "Đã thanh toán", "dowload"),
-  createData(2, "Tiền điện tháng 2", 200000, "Đã thanh toán", "dowload"),
-];
+// const rows = [
+//   createData(1, "Tiền điện tháng 1", 200000, "Đã thanh toán", "dowload"),
+//   createData(2, "Tiền điện tháng 2", 200000, "Đã thanh toán", "dowload"),
+// ];
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -68,24 +76,24 @@ function getComparator<Key extends keyof any>(
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-function stableSort<T>(
-  array: readonly T[],
-  comparator: (a: T, b: T) => number
-) {
-  const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) {
-      return order;
-    }
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
-}
+// function stableSort<T>(
+//   array: readonly T[],
+//   comparator: (a: T, b: T) => number
+// ) {
+//   const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
+//   stabilizedThis.sort((a, b) => {
+//     const order = comparator(a[0], b[0]);
+//     if (order !== 0) {
+//       return order;
+//     }
+//     return a[1] - b[1];
+//   });
+//   return stabilizedThis.map((el) => el[0]);
+// }
 
 interface HeadCell {
   disablePadding: boolean;
-  id: keyof Data;
+  id: keyof TableRow;
   label: string;
   numeric: boolean;
 }
@@ -102,6 +110,12 @@ const headCells: readonly HeadCell[] = [
     numeric: true,
     disablePadding: false,
     label: "Nội dung",
+  },
+  {
+    id: "electricityIndex",
+    numeric: true,
+    disablePadding: false,
+    label: "Số điện",
   },
   {
     id: "amount",
@@ -125,7 +139,6 @@ const headCells: readonly HeadCell[] = [
 
 const DEFAULT_ORDER = "asc";
 const DEFAULT_ORDER_BY = "amount";
-const DEFAULT_ROWS_PER_PAGE = 5;
 
 interface EnhancedTableProps {
   numSelected: number;
@@ -136,10 +149,7 @@ interface EnhancedTableProps {
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
-  const { onSelectAllClick, order, orderBy, numSelected, rowCount } = props;
-  const createSortHandler =
-    (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {};
-
+  const {  order, orderBy, numSelected, rowCount } = props;
   return (
     <TableHead>
       <TableRow>
@@ -158,29 +168,41 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-interface Bill {}
-interface PaymentTableProps {
-  addBill: (bill: Bill[]) => void;
-}
 
 export default function PaymentHistory() {
-  const [order, setOrder] = React.useState<Order>(DEFAULT_ORDER);
-  const [orderBy, setOrderBy] = React.useState<keyof Data>(DEFAULT_ORDER_BY);
-  const [selected, setSelected] = React.useState<Data[]>([]);
-  const [visibleRows, setVisibleRows] = React.useState<Data[] | null>(null);
+  const [selected, setSelected] = React.useState<Bill[]>([]);
+  const [visibleRows, setVisibleRows] = React.useState<Bill[] | null>(null);
+  const [paidBills, setPaidBills] = useState<Bill[]>([]);
+  const [rows, setRows] = useState<Bill[]>([]);
+  const { user } = useSelector((state: RootState) => state.user);
 
-  React.useEffect(() => {
-    let rowsOnMount = stableSort(
-      rows,
-      getComparator(DEFAULT_ORDER, DEFAULT_ORDER_BY)
-    );
-    rowsOnMount = rowsOnMount.slice(
-      0 * DEFAULT_ROWS_PER_PAGE,
-      0 * DEFAULT_ROWS_PER_PAGE + DEFAULT_ROWS_PER_PAGE
-    );
-
-    setVisibleRows(rowsOnMount);
+  const getUnpaidBill = async () => {
+    try {
+      const res = await billApi.getPaid({ userCode: user?.userCode } as any);
+      setPaidBills(res.data.data);
+    } catch (err) {}
+  };
+  useEffect(() => {
+    getUnpaidBill();
   }, []);
+
+  useEffect(() => {
+    if (paidBills) {
+      const _rows = paidBills.map((bill, index) => {
+        return createData(
+          bill._id,
+          bill.content,
+          bill.electricityIndex,
+          bill.electricityIndex * 2500,
+          bill.isPaid,
+          bill.userCode
+        );
+      });
+      setRows(_rows);
+    }
+  }, [paidBills]);
+
+  console.log(rows);
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -191,9 +213,9 @@ export default function PaymentHistory() {
     setSelected([]);
   };
 
-  const handleClick = (event: React.MouseEvent<unknown>, data: Data) => {
+  const handleClick = (event: React.MouseEvent<unknown>, data: Bill) => {
     const selectedIndex = selected.indexOf(data);
-    let newSelected: Data[] = [];
+    let newSelected: Bill[] = [];
 
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, data);
@@ -210,10 +232,9 @@ export default function PaymentHistory() {
     setSelected(newSelected);
   };
 
-  const isSelected = (row: Data) => {
+  const isSelected = (row: Bill) => {
     return selected.indexOf(row) !== -1;
   };
-
 
   return (
     <Box mt={2} sx={{ width: "100%" }}>
@@ -225,14 +246,14 @@ export default function PaymentHistory() {
           >
             <EnhancedTableHead
               numSelected={selected.length}
-              order={order}
-              orderBy={orderBy}
+              order={DEFAULT_ORDER}
+              orderBy={DEFAULT_ORDER_BY}
               onSelectAllClick={handleSelectAllClick}
               rowCount={rows.length}
             />
             <TableBody>
-              {visibleRows
-                ? visibleRows.map((row, index) => {
+              {rows
+                ? rows.map((row, index) => {
                     const isItemSelected = isSelected(row);
                     // console.log(isItemSelected);
 
@@ -259,12 +280,22 @@ export default function PaymentHistory() {
                           {index + 1}
                         </TableCell>
                         <TableCell align="center">{row.content}</TableCell>
-                        <TableCell align="center">{row.amount}</TableCell>
-                        <TableCell align="center">{row.note}</TableCell>
+                        <TableCell align="center">{row.electricityIndex}</TableCell>
+                        <TableCell align="center">
+                          {row.amountMoney.toLocaleString("it-IT", {
+                            style: "currency",
+                            currency: "VND",
+                          })}
+                        </TableCell>
+                        <TableCell align="center">
+                          {row.isPaid === true
+                            ? "Đã thanh toán"
+                            : "Chưa thanh toán"}
+                        </TableCell>
                         <TableCell align="center">
                           <PDFDownloadLink
                             document={<MyDocument {...row} />}
-                            fileName="somename.pdf"
+                            fileName={`${row.content}.pdf`}
                           >
                             {({ blob, url, loading, error }) =>
                               loading ? (

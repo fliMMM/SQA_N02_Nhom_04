@@ -12,30 +12,50 @@ import SendIcon from "@mui/icons-material/Send";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import PaymentTable from "./Table";
 import { useState } from "react";
+import Bill, { BillToPay } from "../../../../models/bill.model";
+import useNotis from "../../../../hook/noti";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../app/store";
-
-interface Bill {
-
-}
+import billApi from "../../../../api/billApi";
+import CircularProgress from "@mui/material/CircularProgress";
 
 function ThanhToan() {
   const [bank, setBank] = useState<string>("Chọn ngân hàng");
-  const [bill, setBill] = useState<string[]>([]);
-  const {user} = useSelector((state:RootState)=> state.user)
-
-  //  console.log(user);
-  
+  const [bill, setBill] = useState<Bill[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const { user } = useSelector((state: RootState) => state.user);
+  const noti = useNotis();
 
   const handleSelectBank = (e: SelectChangeEvent) => {
-    console.log(e.target.value);
-    
     setBank(e.target.value);
   };
 
-  const handlePay = () => {
-    console.log(bill);
-  }
+  const handlePay = async () => {
+    if (bank === "Chọn ngân hàng") {
+      noti("Hãy chọn ngân hàng thanh toán", "info");
+      return;
+    }
+    if (bill.length === 0) {
+      noti("Hãy chọn 1 hoá đơn để thanh toán", "info");
+      return;
+    }
+
+    const billIds = bill.map((bill) => bill._id);
+
+    const billToPay: BillToPay = {
+      userCode: user?.userCode as string,
+      billIds,
+    };
+
+    try {
+      setLoading(true);
+      const res = await billApi.pay(billToPay);
+      noti(res.data.message, "success");
+      setLoading(false);
+    } catch (err) {
+      noti("Thanh toán không thành công", "error");
+    }
+  };
   return (
     <Box>
       <Box mb={1} width={{ lg: "80%" }}>
@@ -57,13 +77,13 @@ function ThanhToan() {
             <span style={{ display: "inline-block", minWidth: "130px" }}>
               Họ tên:
             </span>{" "}
-            <b>Bùi Huy Bách</b>
+            <b>{user?.fullname}</b>
           </Typography>
           <Typography fontSize={"16px"}>
             <span style={{ display: "inline-block", minWidth: "130px" }}>
               Mã khách hàng:
             </span>{" "}
-            <b>00110022003</b>
+            <b>{user?.userCode}</b>
           </Typography>
         </Stack>
 
@@ -78,7 +98,7 @@ function ThanhToan() {
             <span style={{ display: "inline-block", minWidth: "130px" }}>
               Địa chỉ:
             </span>{" "}
-            <b>Ha noi</b>
+            <b>{user?.address}</b>
           </Typography>
         </Stack>
 
@@ -110,7 +130,13 @@ function ThanhToan() {
           </FormControl>
           <Button
             onClick={handlePay}
-            startIcon={<SendIcon sx={{ color: "white" }} />}
+            startIcon={
+              loading === false ? (
+                <SendIcon sx={{ color: "white" }} />
+              ) : (
+                <CircularProgress size={15} sx={{ color: "white" }} />
+              )
+            }
             sx={{
               height: "40px",
               width: "300px",
@@ -130,7 +156,7 @@ function ThanhToan() {
         <Typography mb={1} color={"#223671"} fontSize={17} fontWeight={"bold"}>
           Thông tin thanh toán
         </Typography>
-        <PaymentTable addBill={setBill}/>
+        <PaymentTable addBill={setBill} />
       </Box>
     </Box>
   );

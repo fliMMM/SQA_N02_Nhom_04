@@ -6,7 +6,9 @@ interface User {
   createdAt?: string,
   electricityIndex?: number;
   _v?: number;
-  _id?:string
+  _id?: string;
+  fullname?: string;
+  address?: string;
 }
 
 export default User

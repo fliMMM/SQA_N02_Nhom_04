@@ -43,7 +43,7 @@ function Header(props: Props) {
   // }, []);
 
   const _logout = () => {
-    dispatch(logout({}));
+    dispatch(logout());
     location.reload();
   }
 

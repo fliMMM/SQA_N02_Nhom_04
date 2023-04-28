@@ -35,7 +35,8 @@ export const _register = createAsyncThunk(
       const res = await authApi.register(loginData);
       return res.data as MyData;
     } catch (err: any) {
-      return rejectWithValue(err.response.data as ErrorData);
+      let _err = (err as AxiosError)
+      return rejectWithValue(_err.response?.data as ErrorData);
     }
   }
 );
@@ -64,6 +65,9 @@ const userSlice = createSlice({
       state.isError = false;
       state.errorMessage = "";
     },
+    removeError(state) {
+      state.isError = false;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -104,6 +108,6 @@ const userSlice = createSlice({
 
 const { reducer, actions } = userSlice;
 
-export const { logout } = actions;
+export const { logout, removeError } = actions;
 
 export default reducer;

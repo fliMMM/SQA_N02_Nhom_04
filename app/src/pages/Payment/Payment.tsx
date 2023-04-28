@@ -7,16 +7,19 @@ import { useTheme } from "@mui/material/styles";
 import { Tabs, Tab, Box } from "@mui/material";
 import ThanhToan from "./Tabs/ThanhToan/ThanhToan";
 import PaymentHistory from "./Tabs/LichSu/LichSuThanhToan";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../app/store";
 
 function Payment() {
   const [tab, setTab] = useState(0);
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
   const handleChangTab = (e: React.SyntheticEvent, newValue: number) => {
     setTab(newValue);
-    console.log(newValue);
   };
+
+
+
+  
   return (
     <Box sx={{ width: "100%" }}>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>

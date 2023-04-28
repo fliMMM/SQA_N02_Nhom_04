@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Font,
 } from "@react-pdf/renderer";
+import Bill from "../../../../models/bill.model";
 
 Font.register({
   family: "Roboto",
@@ -34,20 +35,13 @@ const styles = StyleSheet.create({
   },
 });
 
-interface Data {
-  stt: number;
-  content: string;
-  amount: number;
-  note: string;
-  action: string;
-}
 
 // Create Document Component
-const MyDocument = (data: Data) => (
+const MyDocument = (data: Bill) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.section}>
-        <Text>{data.amount}</Text>
+        <Text>{data.amountMoney}</Text>
       </View>
       <View style={styles.section}>
         <Text>lịch sử thanh toán</Text>

@@ -12,29 +12,34 @@ import { useEffect, useState } from "react";
 import billApi from "../../../../api/billApi";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../app/store";
-import User from "../../../../models/user.model";
+import Bill from "../../../../models/bill.model";
+import { Typography } from "@mui/material";
 
-interface Data {
+interface TableRow {
   stt: number;
   content: string;
   amount: number;
   electricityIndex: number;
+  _id: string;
 }
 
 function createData(
-  stt: number,
+  _id: string,
   content: string,
   electricityIndex: number,
-  amount: number
-): Data {
+  amountMoney: number,
+  isPaid: boolean,
+  userCode: string
+): Bill {
   return {
-    stt,
+    _id,
     content,
     electricityIndex,
-    amount,
+    amountMoney,
+    isPaid,
+    userCode,
   };
 }
-
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -60,24 +65,24 @@ function getComparator<Key extends keyof any>(
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-function stableSort<T>(
-  array: readonly T[],
-  comparator: (a: T, b: T) => number
-) {
-  const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) {
-      return order;
-    }
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
-}
+// function stableSort<T>(
+//   array: readonly T[],
+//   comparator: (a: T, b: T) => number
+// ) {
+//   const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
+//   stabilizedThis.sort((a, b) => {
+//     const order = comparator(a[0], b[0]);
+//     if (order !== 0) {
+//       return order;
+//     }
+//     return a[1] - b[1];
+//   });
+//   return stabilizedThis.map((el) => el[0]);
+// }
 
 interface HeadCell {
   disablePadding: boolean;
-  id: keyof Data;
+  id: keyof TableRow;
   label: string;
   numeric: boolean;
 }
@@ -141,7 +146,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={"left"}
+            align={"center"}
             padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
@@ -153,63 +158,45 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-interface Bill {
-  _id: string;
-  userCode: string;
-  electricityIndex: number;
-  isPaid: false;
-}
 interface PaymentTableProps {
-  addBill: (bill: string[]) => void;
+  addBill: (bill: Bill[]) => void;
 }
 
 export default function PaymentTable({ addBill }: PaymentTableProps) {
-  const [order, setOrder] = React.useState<Order>(DEFAULT_ORDER);
-  const [orderBy, setOrderBy] = React.useState<keyof Data>(DEFAULT_ORDER_BY);
-  const [selected, setSelected] = React.useState<string[]>([]);
-  const [visibleRows, setVisibleRows] = React.useState<Data[] | null>(null);
+  const [selected, setSelected] = React.useState<Bill[]>([]);
   const { user } = useSelector((state: RootState) => state.user);
   const [unpaidBills, setUnpaidBills] = useState<Bill[]>([]);
-
-  const _rows = [
-  createData(1, "Tiền điện tháng 1", 30, 200000),
-  createData(2, "Tiền điện tháng 2", 40, 200000),
-];
-
-  const rows = unpaidBills.map((bill, index) => {
-    return createData(index+1, "", bill.electricityIndex, bill.electricityIndex*2.5)
-  })
-
-  React.useEffect(() => {
-    let rowsOnMount = stableSort(
-      rows,
-      getComparator(DEFAULT_ORDER, DEFAULT_ORDER_BY)
-    );
-    rowsOnMount = rowsOnMount.slice(
-      0 * DEFAULT_ROWS_PER_PAGE,
-      0 * DEFAULT_ROWS_PER_PAGE + DEFAULT_ROWS_PER_PAGE
-    );
-
-    setVisibleRows(rowsOnMount);
-  }, []);
-
+  const [rows, setRows] = useState<Bill[]>([]);
 
   const getUnpaidBill = async () => {
     try {
-      const res = await billApi.getUnpaid({userCode:user?.userCode} as any);
+      const res = await billApi.getUnpaid({ userCode: user?.userCode } as any);
       setUnpaidBills(res.data.data);
-      
-    } catch (err) {
-      
-    }
-  }
+    } catch (err) {}
+  };
   useEffect(() => {
     getUnpaidBill();
-  },[])
+  }, []);
+
+  useEffect(() => {
+    if (unpaidBills) {
+      const _rows = unpaidBills.map((bill, index) => {
+        return createData(
+          bill._id,
+          bill.content,
+          bill.electricityIndex,
+          bill.electricityIndex * 2500,
+          bill.isPaid,
+          bill.userCode
+        );
+      });
+      setRows(_rows);
+    }
+  }, [unpaidBills]);
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelected = rows.map((n) => n.content);
+      const newSelected = rows.map((n) => n);
       addBill(newSelected);
       setSelected(newSelected);
       return;
@@ -218,12 +205,12 @@ export default function PaymentTable({ addBill }: PaymentTableProps) {
     setSelected([]);
   };
 
-  const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected: string[] = [];
+  const handleClick = (event: React.MouseEvent<unknown>, row: Bill) => {
+    const selectedIndex = selected.indexOf(row);
+    let newSelected: Bill[] = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selected, row);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -238,43 +225,37 @@ export default function PaymentTable({ addBill }: PaymentTableProps) {
     addBill(newSelected);
   };
 
-  const isSelected = (content: string) => {
-    return selected.indexOf(content) !== -1;
+  const isSelected = (row: Bill) => {
+    return selected.indexOf(row) !== -1;
   };
-
-  
 
   return (
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <TableContainer>
-          <Table
-            // sx={{ minWidth: 750 }}
-            aria-labelledby="tableTitle"
-          >
+          <Table aria-labelledby="tableTitle">
             <EnhancedTableHead
               numSelected={selected.length}
-              order={order}
-              orderBy={orderBy}
+              order={DEFAULT_ORDER}
+              orderBy={DEFAULT_ORDER_BY}
               onSelectAllClick={handleSelectAllClick}
               rowCount={rows.length}
             />
             <TableBody>
-              {visibleRows
-                ? visibleRows.map((row, index) => {
-                    const isItemSelected = isSelected(row.content);
-                    // console.log(isItemSelected);
+              {rows.length > 0
+                ? rows.map((row, index) => {
+                    const isItemSelected = isSelected(row);
 
                     const labelId = `enhanced-table-checkbox-${index}`;
 
                     return (
                       <TableRow
                         hover
-                        onClick={(event) => handleClick(event, row.content)}
+                        onClick={(event) => handleClick(event, row)}
                         role="checkbox"
                         aria-checked={isItemSelected}
                         tabIndex={-1}
-                        key={row.content}
+                        key={row._id}
                         selected={isItemSelected}
                         sx={{ cursor: "pointer" }}
                       >
@@ -292,15 +273,16 @@ export default function PaymentTable({ addBill }: PaymentTableProps) {
                           id={labelId}
                           scope="row"
                           padding="none"
+                          align="center"
                         >
                           {index + 1}
                         </TableCell>
-                        <TableCell align="left">{row.content}</TableCell>
-                        <TableCell align="left">
+                        <TableCell align="center">{row.content}</TableCell>
+                        <TableCell align="center">
                           {row.electricityIndex}
                         </TableCell>
-                        <TableCell align="left">
-                          {row.amount.toLocaleString("it-IT", {
+                        <TableCell align="center">
+                          {row.amountMoney.toLocaleString("it-IT", {
                             style: "currency",
                             currency: "VND",
                           })}

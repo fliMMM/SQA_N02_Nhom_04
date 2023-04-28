@@ -7,19 +7,19 @@ import {
   Typography,
   FormHelperText,
 } from "@mui/material";
-import LoadingButton from "@mui/lab/LoadingButton";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { MyData, login } from "../../slices/userSlice";
-import User from "../../models/user.model";
+import useNotis from "../../hook/noti";
 import "react-toastify/dist/ReactToastify.css";
 import CircularProgress from "@mui/material/CircularProgress";
 import { AppDispatch, RootState } from "../../app/store";
 import { useEffect } from "react";
 import { useSnackbar } from "notistack";
+import { removeError } from "../../slices/userSlice";
 
 const emailRegExp =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -50,6 +50,7 @@ function Login() {
     resolver: yupResolver(schema),
   });
 
+  const noti = useNotis();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { user, errorMessage, isLoading, isError } = useSelector(
@@ -67,10 +68,8 @@ function Login() {
 
   useEffect(() => {
     if (isError) {
-      enqueueSnackbar(errorMessage, {
-        variant: "error",
-        autoHideDuration: 2000,
-      });
+      noti(errorMessage, 'error');
+      dispatch(removeError());
     }
   }, [isError]);
 
