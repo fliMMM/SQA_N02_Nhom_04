@@ -1,6 +1,8 @@
 const express = require("express");
 const Router = express.Router();
 const BillSchema = require("../model/bill");
+const nodemailer = require("nodemailer");
+const UserSchema = require('../model/user')
 
 Router.post("/get-unpaid", async (req, res) => {
   const { userCode } = req.body;
@@ -34,14 +36,51 @@ Router.post("/get-paid", async (req, res) => {
   }
 });
 
+const genMailcontent = (bills) => {
+  let html = "";
+
+  bills.map((bill) => {
+    html+= `<h1>${bill.content}: <span>${bill.electricityIndex * 2500}</span></h1>`
+  })
+  return html;
+}
+
+const sendEmail = (receiverEmail, bills) => {
+  var transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "bachkame123@gmail.com",
+      pass: "yylywaybxwiqyvjk",
+    },
+  });
+
+  var mailOptions = {
+    from: "bachkame123@gmail.com",
+    to: receiverEmail,
+    subject: "Hóa đơn tiền điện đã được thanh toán",
+    html: genMailcontent(bills)
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email sent: " + receiverEmail);
+    }
+  });
+};
+
 Router.post("/pay", async (req, res) => {
   const { userCode, billIds } = req.body;
   // console.log(billIds);
   try {
-    const bills = await BillSchema.updateMany(
+    const user = await UserSchema.find({ userCode: userCode })
+    const bills = await BillSchema.find({_id:{$in:billIds}})
+    await BillSchema.updateMany(
       { _id: { $in: billIds } },
       { isPaid: true }
     );
+    sendEmail(user[0].email, bills)
     return res
       .status(200)
       .json({ success: true, message: "Thanh toan thành công", data: bills });
