@@ -48,7 +48,6 @@ const genMailcontent = (bills) => {
 const sendEmail = (receiverEmail, bills) => {
   var transporter = nodemailer.createTransport({
     service: "gmail",
-    secure:true,
     auth: {
       user: "bachkame123@gmail.com",
       pass: "yylywaybxwiqyvjk",
