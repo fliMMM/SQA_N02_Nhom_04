@@ -18,6 +18,7 @@ import Bill from "../../../../models/bill.model";
 import billApi from "../../../../api/billApi";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../app/store";
+import dayjs from "dayjs";
 
 interface TableRow {
   stt: number;
@@ -37,7 +38,7 @@ function createData(
   amountMoney: number,
   isPaid: boolean,
   userCode: string,
-  updateAt: string
+  updatedAt: string
 ): Bill {
   return {
     _id,
@@ -46,7 +47,7 @@ function createData(
     amountMoney,
     isPaid,
     userCode,
-    updateAt
+    updatedAt
   };
 }
 
@@ -210,7 +211,7 @@ export default function PaymentHistory({reload, setReload}: PaymenHisProps) {
           bill.electricityIndex * 2500,
           bill.isPaid,
           bill.userCode,
-          bill.updateAt
+          bill.updatedAt
         );
       });
       setRows(_rows);
@@ -250,6 +251,9 @@ export default function PaymentHistory({reload, setReload}: PaymenHisProps) {
   const isSelected = (row: Bill) => {
     return selected.indexOf(row) !== -1;
   };
+
+  console.log(paidBills);
+  
 
   return (
     <Box mt={2} sx={{ width: "100%" }}>
@@ -308,7 +312,7 @@ export default function PaymentHistory({reload, setReload}: PaymenHisProps) {
                             : "Chưa thanh toán"}
                         </TableCell>
                         <TableCell align="center">
-                          {row.updateAt}
+                          {dayjs(row.updatedAt).format("DD/MM/YYYY")}
                         </TableCell>
                         <TableCell align="center">
                           <PDFDownloadLink
