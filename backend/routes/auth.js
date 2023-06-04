@@ -29,17 +29,18 @@ Router.post("/login", async (req, res) => {
 
 const scheduleAddBill = async (user) => {
   console.log("start schedule for: ", user.fullname);
+  let date = new Date();
   const _newBill = new BillsSchema({
     userCode: user.userCode,
     electricityIndex: 150,
-    content: `Tiền điện tháng ${new Date().getMonth() +1}`,
+    content: `Tiền điện tháng ${date.getMonth() +1}`,
   });
   await _newBill.save();
   cron.schedule("0 1 28 * *", async () => {
     const newBill = new BillsSchema({
       userCode: user.userCode,
       electricityIndex: 150,
-      content: `Tiền điện tháng ${new Date().getMonth() +1}`,
+      content: `Tiền điện tháng ${date.getMonth() +1}`,
     });
     console.log("add bill for user: ", user.email);
     await newBill.save();
