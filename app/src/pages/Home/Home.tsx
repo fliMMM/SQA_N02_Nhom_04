@@ -58,7 +58,7 @@ function Home() {
             >
               <Stack spacing={1}>
                 <Typography color={"white"} fontSize={20} fontWeight={"bold"}>
-                  {convertNumberToVnd(tinhTienDien(user.electricityIndex))}
+                  {tinhTienDien(user.electricityIndex) + " VND"}
                 </Typography>
 
                 <Typography color={"white"} fontSize={15} fontWeight={"bold"}>
@@ -85,7 +85,7 @@ function Home() {
             >
               <Stack spacing={1}>
                 <Typography color={"white"} fontSize={20} fontWeight={"bold"}>
-                  {convertNumberToVnd(tinhTienDien(user.electricityIndex))}
+                  {tinhTienDien(user.electricityIndex) + " VND"}
                 </Typography>
 
                 <Typography color={"white"} fontSize={15} fontWeight={"bold"}>

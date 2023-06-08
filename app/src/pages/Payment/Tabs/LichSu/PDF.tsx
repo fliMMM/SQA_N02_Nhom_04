@@ -21,12 +21,15 @@ const styles = StyleSheet.create({
     paddingTop: 35,
     paddingBottom: 65,
     paddingHorizontal: 35,
+   
     
   },
   page: {
     flexDirection: "row",
     backgroundColor: "white",
     fontFamily: "Roboto",
+    display: "flex",
+    flexBasis: 1
   },
   section: {
     margin: 10,
@@ -40,12 +43,12 @@ const styles = StyleSheet.create({
 const MyDocument = (data: Bill) => (
   <Document>
     <Page size="A4" style={styles.page}>
+      
       <View style={styles.section}>
-        <Text>{data.amountMoney}</Text>
+        <Text>{data.content}</Text>
+        <Text>{data.amountMoney + " VNĐ"}</Text>
       </View>
-      <View style={styles.section}>
-        <Text>lịch sử thanh toán</Text>
-      </View>
+      
     </Page>
   </Document>
 );

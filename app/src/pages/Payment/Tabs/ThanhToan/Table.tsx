@@ -14,6 +14,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../app/store";
 import Bill from "../../../../models/bill.model";
 import { Typography } from "@mui/material";
+import tinhTienDien from "../../../../utils/tinhTienDien";
 
 interface TableRow {
   stt: number;
@@ -27,7 +28,7 @@ function createData(
   _id: string,
   content: string,
   electricityIndex: number,
-  amountMoney: number,
+  amountMoney: string,
   isPaid: boolean,
   userCode: string
 ): Bill {
@@ -186,7 +187,7 @@ export default function PaymentTable({ addBill, reload }: PaymentTableProps) {
           bill._id,
           bill.content,
           bill.electricityIndex,
-          bill.electricityIndex * 2500,
+          tinhTienDien(bill.electricityIndex),
           bill.isPaid,
           bill.userCode
         );
@@ -283,10 +284,7 @@ export default function PaymentTable({ addBill, reload }: PaymentTableProps) {
                           {row.electricityIndex}
                         </TableCell>
                         <TableCell align="center">
-                          {row.amountMoney.toLocaleString("it-IT", {
-                            style: "currency",
-                            currency: "VND",
-                          })}
+                          {row.amountMoney +" VND"}
                         </TableCell>
                       </TableRow>
                     );

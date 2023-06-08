@@ -1,11 +1,11 @@
 interface Bill{
   _id: string;
   userCode: string;
-  amountMoney: number;
+  amountMoney: string;
   electricityIndex: number;
   isPaid: boolean;
   content: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export interface BillToPay{
